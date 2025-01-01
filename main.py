@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 from typing import Optional
 
+# Activate the virtual environment: source venv/bin/activate
+# To run : uvicorn main:app --reload
 
 load_dotenv()
 # Load drills data
@@ -41,18 +43,18 @@ def recommend_drills(
 # Define the tool function with stricter type handling
 def recommend_drills_tool(
     ctx: RunContext,
-    focus_area: str = "",  # Default to an empty string
-    difficulty: str = "",  # Default to an empty string
-    num_players: int = 0   # Default to 0
+    focus_area: str = None,  # Default to an empty string
+    difficulty: str = None,  # Default to an empty string
+    num_players: int = None   # Default to 0
 ) -> list:
     """
     Tool function to recommend drills based on user input.
     Handles optional parameters explicitly by providing defaults.
     """
     # Use defaults if values are missing
-    focus_area = focus_area or ""
+    focus_area = focus_area or "Consistency"
     difficulty = difficulty or ""
-    num_players = num_players or 0
+    num_players = num_players or 2
 
     # Implement filtering logic
     return filter_drills(focus_area, difficulty, num_players)
@@ -66,7 +68,11 @@ recommend_drills_tool_wrapper = Tool(
 # Create an AI agent
 agent = Agent(
     model='gemini-1.5-flash',
-    system_prompt="You are a tennis coach helping users find the best drills.",
+    system_prompt=(
+        "You are a tennis coach helping users find the best drills. "
+        "If the user does not provide all or any inputs, use the default values: "
+        "Focus Area = 'Consistency', Difficulty = 'Intermediate', Number of Players = 2."
+    ),
     tools=[recommend_drills_tool_wrapper]
 )
 
