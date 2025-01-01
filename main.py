@@ -18,7 +18,7 @@ drills_data = pd.read_csv(DATA_PATH)
 app = FastAPI(title="Rakket AI", description="Tennis Drill Recommendation System", version="0.1")
 
 # Helper function to filter drills based on user inputs
-def filter_drills(focus_area: Optional[str] = None, difficulty: Optional[str] = None, num_players: Optional[int] = None):
+def filter_drills(focus_area: Optional[str] = None, difficulty: Optional[str] = None, num_players: Optional[int] = None, shot_type: Optional[str] = None):
     filtered_data = drills_data
     if focus_area:
         filtered_data = filtered_data[filtered_data["Focus Area"].str.contains(focus_area, case=False, na=False)]
@@ -26,26 +26,30 @@ def filter_drills(focus_area: Optional[str] = None, difficulty: Optional[str] = 
         filtered_data = filtered_data[filtered_data["Difficulty"].str.contains(difficulty, case=False, na=False)]
     if num_players:
         filtered_data = filtered_data[filtered_data["Number of Players"].astype(str).str.contains(str(num_players), na=False)]
-    return filtered_data[["Drill Name", "Focus Area", "Difficulty", "Description"]].to_dict(orient="records")
+    if shot_type:
+        filtered_data = filtered_data[filtered_data["Shot/Type"].str.contains(shot_type, case=False, na=False)]
+    return filtered_data[["Drill Name", "Focus Area", "Difficulty", "Shot/Type", "Description"]].to_dict(orient="records")
 
 # GET: API route for drill recommendations based on query parameters
 @app.get("/recommend-drills", response_model=List[dict])
 def recommend_drills(
     focus_area: Optional[str] = Query(None, description="Focus area of the drill (e.g., Consistency, Accuracy)"),
     difficulty: Optional[str] = Query(None, description="Difficulty level (e.g., Beginner, Intermediate, Advanced)"),
-    num_players: Optional[int] = Query(None, description="Number of players (e.g., 1, 2, 4)")
+    num_players: Optional[int] = Query(None, description="Number of players (e.g., 1, 2, 4)"),
+    shot_type: Optional[str] = Query(None, description="Type of shot or drill focus (e.g., Volley, Serve, Groundstrokes)")
 ):
     """
-    Recommend tennis drills based on focus area, difficulty level, and number of players.
+    Recommend tennis drills based on focus area, difficulty level, number of players, and shot type.
     """
-    return filter_drills(focus_area, difficulty, num_players)
+    return filter_drills(focus_area, difficulty, num_players, shot_type)
 
 # Define the tool function with stricter type handling
 def recommend_drills_tool(
     ctx: RunContext,
     focus_area: str = None,  # Default to an empty string
     difficulty: str = None,  # Default to an empty string
-    num_players: int = None   # Default to 0
+    num_players: int = None,  # Default to 0
+    shot_type: str = None     # Default to an empty string
 ) -> list:
     """
     Tool function to recommend drills based on user input.
@@ -55,14 +59,15 @@ def recommend_drills_tool(
     focus_area = focus_area or "Consistency"
     difficulty = difficulty or ""
     num_players = num_players or 2
+    shot_type = shot_type or ""
 
     # Implement filtering logic
-    return filter_drills(focus_area, difficulty, num_players)
+    return filter_drills(focus_area, difficulty, num_players, shot_type)
 
 # Wrap the tool function
 recommend_drills_tool_wrapper = Tool(
     recommend_drills_tool,
-    description="Recommend tennis drills based on user inputs like focus area, difficulty, and number of players."
+    description="Recommend tennis drills based on user inputs like focus area, difficulty, number of players, and shot type."
 )
 
 # Create an AI agent
@@ -71,7 +76,7 @@ agent = Agent(
     system_prompt=(
         "You are a tennis coach helping users find the best drills. "
         "If the user does not provide all or any inputs, use the default values: "
-        "Focus Area = 'Consistency', Difficulty = 'Intermediate', Number of Players = 2."
+        "Focus Area = 'Consistency', Difficulty = 'Intermediate', Number of Players = 2, Shot Type = ''."
     ),
     tools=[recommend_drills_tool_wrapper]
 )
