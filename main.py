@@ -5,6 +5,9 @@ from pydantic_ai import Agent, Tool, RunContext
 from dotenv import load_dotenv
 import os
 from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 # Activate the virtual environment: source venv/bin/activate
 # To run : uvicorn main:app --reload
@@ -16,6 +19,21 @@ drills_data = pd.read_csv(DATA_PATH)
 
 # Initialize FastAPI app
 app = FastAPI(title="Rakket AI", description="Tennis Drill Recommendation System", version="0.1")
+
+# Add CORS middleware right after app initialization
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://rakket.io",          # Production
+        "https://www.rakket.io",      # Production with www
+        "http://localhost:3000",      # Local frontend development
+        "http://127.0.0.1:8000",     # Local FastAPI development
+        "http://localhost:8000"       # Alternative local FastAPI address
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Helper function to filter drills based on user inputs
 def filter_drills(focus_area: Optional[str] = None, difficulty: Optional[str] = None, num_players: Optional[int] = None, shot_type: Optional[str] = None):
