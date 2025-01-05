@@ -20,7 +20,7 @@ drills_data = pd.read_csv(DATA_PATH)
 # Initialize FastAPI app
 app = FastAPI(title="Rakket AI", description="Tennis Drill Recommendation System", version="0.1")
 
-# Add CORS middleware right after app initialization
+# CORS middleware - why is it needed? browsers would block requests from your frontend to your API due to the Same-Origin Policy security feature
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
