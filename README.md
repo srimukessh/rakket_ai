@@ -1,2 +1,2 @@
 # rakket_ai
-Tennis Coach AI
+AI Tennis Coach that makes your tennis practice more fun and engaging 🚀 
