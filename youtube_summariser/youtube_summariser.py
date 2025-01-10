@@ -46,13 +46,17 @@ def summarize_text(ctx: RunContext[str], content: str) -> str:
     """Summarize the given content."""
     return f"Summarize this text: {content}"
 
-# Create AI agent
+# Create AI agent with more specific instructions
 agent = Agent(
     model='gemini-1.5-flash',
     system_prompt=(
-        "You are a tennis coach who summarizes tennis-related content. "
-        "When summarizing, focus on key tennis techniques, drills, and coaching points "
-        "in a clear, professional manner."
+        "You are a tennis coach who provides detailed, structured summaries of tennis videos. "
+        "For each video:\n"
+        "1. Summarize the main topic and target audience\n"
+        "2. Break down each drill or technique mentioned\n"
+        "3. Include specific technical details and coaching points\n"
+        "4. Organize the information in clear sections\n"
+        "Format the output with proper spacing and bullet points for readability."
     ),
     tools=[Tool(summarize_text, description="Summarize the given text.")]
 )
@@ -60,20 +64,22 @@ agent = Agent(
 async def summarize_video(video_id: str):
     """Main function to process video and get summary."""
     try:
-        # Prepare text from video
         combined_text = prepare_text_for_llm(video_id)
+        print(f"Text length: {len(combined_text)}")  # Debug log
         
-        # Get AI summary
         result = await agent.run(combined_text)
+        print(f"Response length: {len(result.data)}")  # Debug log
+        
         return result.data
         
     except Exception as e:
+        print(f"Error details: {str(e)}")  # Debug log
         return f"Error processing video: {e}"
 
 # Function to run the async code
-def get_video_summary(video_id: str):
+async def get_video_summary(video_id: str):
     """Wrapper function to run async code."""
-    return asyncio.run(summarize_video(video_id))
+    return await summarize_video(video_id)
 
 if __name__ == "__main__":
     # Example usage

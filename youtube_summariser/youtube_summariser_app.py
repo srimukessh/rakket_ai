@@ -1,5 +1,6 @@
 import streamlit as st
 from youtube_summariser import get_video_summary
+import asyncio
 
 # to run the app: streamlit run youtube_summariser_app.py
 
@@ -27,20 +28,29 @@ video_url = st.text_input(
     placeholder="https://youtube.com/watch?v=... or video_id"
 )
 
+async def get_summary(video_id):
+    """Async wrapper for get_video_summary"""
+    try:
+        # Create new event loop for this context
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        summary = await get_video_summary(video_id)
+        return summary
+    finally:
+        loop.close()
+
 if st.button("Summarize Video", type="primary"):
     if video_url:
         with st.spinner("Analyzing video..."):
             try:
-                # Extract video ID and get summary
                 video_id = extract_video_id(video_url)
-                summary = get_video_summary(video_id)
+                # Run the async function
+                summary = asyncio.run(get_summary(video_id))
                 
-                # Display results
                 st.success("Summary generated successfully!")
                 st.markdown("### Summary")
                 st.markdown(summary)
                 
-                # Display video
                 st.markdown("### Video")
                 st.video(f"https://youtube.com/watch?v={video_id}")
                 
