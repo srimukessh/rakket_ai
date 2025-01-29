@@ -1,6 +1,17 @@
 import streamlit as st
 from youtube_summariser import get_video_summary
 import asyncio
+import os
+
+# Add startup check
+if not os.environ.get("YOUTUBE_API_KEY") or not os.environ.get("GEMINI_API_KEY"):
+    st.error("⚠️ API keys not found. Please check your Streamlit secrets.")
+    st.stop()
+
+# Add health check endpoint
+@st.cache_data
+def health_check():
+    return "OK"
 
 # to run the app: streamlit run youtube_summariser_app.py
 
