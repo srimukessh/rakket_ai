@@ -7,6 +7,10 @@ a clean, structured breakdown of the drills and techniques in it.
 > Personal side project. Powered by **Google Gemini** via **Pydantic AI**, served with **FastAPI** +
 > **Streamlit**, containerised with **Docker** and deployed on **Google Cloud Run**.
 
+> ⛔ **All rights reserved — look, don't copy.** Public for reference/portfolio purposes only; not
+> open source, no permission to copy, fork, run, or reuse. See [`LICENSE`](LICENSE). Want to use any
+> of it? Ask first: srimukessh1994@gmail.com
+
 ---
 
 ## What's inside
@@ -79,12 +83,11 @@ YOUTUBE_API_KEY=your_youtube_key      # used by the summariser only
 For the Streamlit summariser, these can also be provided via Streamlit secrets.
 
 ### Run the Drill Recommender API
-From the repo root (so `data/drills.csv` resolves):
-
 ```bash
 pip install -r api/requirements.txt
 uvicorn api.main:app --reload          # http://localhost:8000  (docs at /docs)
 ```
+The drill CSV is resolved relative to the source file, so you can launch from any directory.
 
 ### Run the Streamlit frontend
 ```bash

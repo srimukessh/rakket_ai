@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from typing import List, Optional
+from pathlib import Path
 import pandas as pd
 from pydantic_ai import Agent, Tool, RunContext
 from dotenv import load_dotenv
@@ -10,11 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 # Activate the virtual environment: source venv/bin/activate
-# To run : uvicorn main:app --reload
+# To run : uvicorn api.main:app --reload
 
 load_dotenv()
-# Load drills data
-DATA_PATH = "data/drills.csv"
+# Load drills data. Resolve relative to this file (repo_root/data/drills.csv) so the
+# API works regardless of the current working directory it's launched from.
+DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "drills.csv"
 drills_data = pd.read_csv(DATA_PATH)
 
 # Initialize FastAPI app
